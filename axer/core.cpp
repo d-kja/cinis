@@ -8,7 +8,7 @@ int main() {
   int height = 600;
   bool muahahahah = true;
 
-  const char *title = "Example";
+  const char *title = "Big ol' axer";
 
   InitWindow(width, height, title);
 
