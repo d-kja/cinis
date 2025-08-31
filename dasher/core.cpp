@@ -2,8 +2,7 @@
 #include <iostream>
 
 struct Window {
-  int width;
-  int height;
+  int dimensions[2];
   const char *title;
 };
 
@@ -18,7 +17,7 @@ struct Engine {
   MovementOffset offset;
 };
 
-Window window = Window{.width = 1200, .height = 600, .title = "Dasher"};
+Window window = Window{.dimensions = {1200, 600}, .title = "Dasher"};
 Engine engine = Engine{
     .delta = 0.0,
     .gravity = 9.8,
@@ -34,11 +33,11 @@ const float animation_update_time = 1.0 / 12.0;
 struct Animation {
   int frame;
   float running_time;
-  const float update_time;
+  float update_time;
 };
 
 struct Sprite {
-  const float sprites;
+  float sprites;
   Animation animation;
 
   float velocity; // force = mass * acceleration;
@@ -48,6 +47,9 @@ struct Sprite {
   Rectangle rectangle;
 };
 
+Sprite hazards[2] = {};
+Texture hazard_texture;
+
 Sprite character = Sprite{
     .sprites = 9.0,
     .animation = Animation{.frame = 0,
@@ -55,9 +57,9 @@ Sprite character = Sprite{
                            .update_time = animation_update_time},
 };
 
-int get_floor_y(int height) { return window.height - height; }
+int get_floor_y(int height) { return window.dimensions[1] - height; }
 int get_center_x() {
-  return window.width / 2.0 - character.rectangle.width / 2;
+  return window.dimensions[0] / 2.0 - character.rectangle.width / 2;
 }
 
 int get_char_left_bound_x() { return character.position.x; }
@@ -72,21 +74,6 @@ int get_char_lower_bound_y() {
 bool is_floor() {
   return character.position.y >= get_floor_y(character.rectangle.height);
 }
-
-//
-// Hazard
-//
-
-Sprite hazard = Sprite{
-    .sprites = 8.0,
-    .animation =
-        Animation{
-            .frame = 0,
-            .running_time = 0.0,
-            .update_time = animation_update_time,
-        },
-    .velocity = 150.0,
-};
 
 float print_debug = 0;
 void debug_state() {
@@ -153,28 +140,40 @@ void render_character() {
 }
 
 void hazard_controller() {
-  hazard.position.x -= hazard.velocity * engine.delta;
+  for (int idx = 0; idx < 2; idx++) {
+    Sprite hazard = hazards[idx];
 
-  if (hazard.position.x <= (hazard.rectangle.width * -1)) {
-    hazard.position.x = window.width;
+    hazard.position.x -= hazard.velocity * engine.delta;
+    if (hazard.position.x <= hazard.rectangle.width * -1) {
+      hazard.position.x = window.dimensions[0];
+    }
+
+    hazards[idx] = hazard;
   }
 }
 
 void render_hazard() {
-  hazard.animation.running_time += engine.delta;
+  for (int idx = 0; idx < 2; idx++) {
+    Sprite hazard = hazards[idx];
+    hazard.animation.running_time += engine.delta;
 
-  if (hazard.animation.running_time >= hazard.animation.update_time) {
-    hazard.animation.running_time = 0.0;
-    hazard.animation.frame += 1;
+    if (hazard.animation.running_time >= hazard.animation.update_time) {
+      hazard.animation.running_time = 0.0;
+      hazard.animation.frame += 1;
+    }
+
+    if (hazard.animation.frame >= hazard.sprites) {
+      hazard.animation.frame = 0;
+    }
+
+    hazard.rectangle.x = hazard.rectangle.width * hazard.animation.frame;
+
+    if (idx != 0) {
+      DrawTextureRec(hazard.texture, hazard.rectangle, hazard.position, RED);
+    } else {
+      DrawTextureRec(hazard.texture, hazard.rectangle, hazard.position, WHITE);
+    }
   }
-
-  if (hazard.animation.frame >= hazard.sprites) {
-    hazard.animation.frame = 0;
-  }
-
-  hazard.rectangle.x = hazard.rectangle.width * hazard.animation.frame;
-
-  DrawTextureRec(hazard.texture, hazard.rectangle, hazard.position, WHITE);
 }
 
 void handle_hitbox() {
@@ -195,32 +194,50 @@ void initialize_character() {
 }
 
 void initialize_hazard() {
-  hazard.texture = LoadTexture("./assets/hazard.png");
+  hazard_texture = LoadTexture("./assets/hazard.png");
 
-  hazard.rectangle.width = hazard.texture.width / hazard.sprites;
-  hazard.rectangle.height = hazard.texture.height / hazard.sprites;
-  hazard.rectangle.x = 0;
-  hazard.rectangle.y = 0;
+  for (int idx = 0; idx < 2; idx++) {
+    Sprite hazard = {
+        .sprites = 8.0,
+        .animation =
+            Animation{
+                .frame = 0,
+                .running_time = 0.0,
+                .update_time = animation_update_time,
+            },
+        .velocity = 150.0,
+    };
 
-  hazard.position.x = window.width;
-  hazard.position.y = get_floor_y(hazard.rectangle.height);
+    hazard.texture = hazard_texture;
+
+    hazard.rectangle.width = hazard.texture.width / hazard.sprites;
+    hazard.rectangle.height = hazard.texture.height / hazard.sprites;
+    hazard.rectangle.x = 0;
+    hazard.rectangle.y = 0;
+
+    hazard.position.x =
+        window.dimensions[0] + (idx * (window.dimensions[0] / 2.0));
+    hazard.position.y = get_floor_y(hazard.rectangle.height);
+
+    hazards[idx] = hazard;
+  }
 }
 
 void kill_game() {
   debug_state();
 
   UnloadTexture(character.texture);
-  UnloadTexture(hazard.texture);
+  UnloadTexture(hazard_texture);
 
   CloseWindow();
 }
 
 int main() {
-  InitWindow(window.width, window.height, window.title);
+  InitWindow(window.dimensions[0], window.dimensions[1], window.title);
   SetTargetFPS(60);
 
-  initialize_character();
   initialize_hazard();
+  initialize_character();
 
   while (true) {
     bool shouldCloseWindow =
