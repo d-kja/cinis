@@ -1,159 +1,248 @@
 #include "raylib.h"
 #include <iostream>
 
-const int window_width = 1200;
-const int window_height = 600;
-const char *window_title = "Dasher";
+struct Window {
+  int width;
+  int height;
+  const char *title;
+};
 
-float delta = 0.0;
-const float movement_positive_offset = 1.5;
-const float movement_negative_offset = 1.0;
+struct MovementOffset {
+  const float positive;
+  const float negative;
+};
 
-const float gravity = 9.8; // 9.8 m/s -> 0.8 -> acceleration due to gravity;
+struct Engine {
+  float delta;
+  const float gravity;
+  MovementOffset offset;
+};
 
-//
-// Character
-//
+Window window = Window{.width = 1200, .height = 600, .title = "Dasher"};
+Engine engine = Engine{
+    .delta = 0.0,
+    .gravity = 9.8,
+    .offset =
+        MovementOffset{
+            .positive = 1.5,
+            .negative = 1.0,
+        },
+};
 
-const float amount_sprites = 9.0;
 const float animation_update_time = 1.0 / 12.0;
 
-int animation_frame = 0;
-float animation_running_time = 0.0;
+struct Animation {
+  int frame;
+  float running_time;
+  const float update_time;
+};
 
-// force = mass * acceleration;
-int mass = 10;
-int direction = 0;
-float velocity = 0.0;
+struct Sprite {
+  const float sprites;
+  Animation animation;
 
-Vector2 character_position;
-Texture2D character_texture;
-Rectangle character_rectangle;
+  float velocity; // force = mass * acceleration;
 
-int get_floor_y() { return window_height - character_rectangle.height; }
+  Vector2 position;
+  Texture2D texture;
+  Rectangle rectangle;
+};
+
+Sprite character = Sprite{
+    .sprites = 9.0,
+    .animation = Animation{.frame = 0,
+                           .running_time = 0.0,
+                           .update_time = animation_update_time},
+};
+
+int get_floor_y(int height) { return window.height - height; }
 int get_center_x() {
-  return window_width / 2.0 - character_rectangle.width / 2;
+  return window.width / 2.0 - character.rectangle.width / 2;
 }
 
-int get_char_left_bound_x() { return character_position.x; }
+int get_char_left_bound_x() { return character.position.x; }
 int get_char_right_bound_x() {
-  return character_position.x + character_rectangle.width;
+  return character.position.x + character.rectangle.width;
 }
-int get_char_upper_bound_y() { return character_position.y; }
+int get_char_upper_bound_y() { return character.position.y; }
 int get_char_lower_bound_y() {
-  return character_position.y + character_rectangle.height;
+  return character.position.y + character.rectangle.height;
 }
 
-bool is_floor() { return character_position.y >= get_floor_y(); }
+bool is_floor() {
+  return character.position.y >= get_floor_y(character.rectangle.height);
+}
 
 //
 // Hazard
 //
 
-Texture hazard_texture;
+Sprite hazard = Sprite{
+    .sprites = 8.0,
+    .animation =
+        Animation{
+            .frame = 0,
+            .running_time = 0.0,
+            .update_time = animation_update_time,
+        },
+    .velocity = 150.0,
+};
 
 float print_debug = 0;
 void debug_state() {
-  print_debug += delta;
+  print_debug += engine.delta;
 
   if (print_debug < 0.5) {
     return;
   }
 
-  std::cout << "DELTA: " << delta << std::endl;
-  std::cout << "CHARACTER X: " << character_position.x << std::endl;
-  std::cout << "CHARACTER Y: " << character_position.y << std::endl;
-  std::cout << "GRAVITY: " << gravity << std::endl;
-  std::cout << "VELOCITY: " << velocity << std::endl;
+  std::cout << "DELTA: " << engine.delta << std::endl;
+  std::cout << "CHARACTER X: " << character.position.x << std::endl;
+  std::cout << "CHARACTER Y: " << character.position.y << std::endl;
+  std::cout << "GRAVITY: " << engine.gravity << std::endl;
+  std::cout << "VELOCITY: " << character.velocity << std::endl;
   std::cout << "FLOOR: " << is_floor() << std::endl;
 
   print_debug = 0;
 }
 
-void reset_movement() { velocity = 0.0; }
-void apply_gravity() { velocity += gravity * delta; }
+void reset_movement() { character.velocity = 0.0; }
+void apply_gravity() { character.velocity += engine.gravity * engine.delta; }
 void check_boundaries() {
   if (is_floor()) {
-    character_position.y = get_floor_y();
-    velocity = 0;
+    character.position.y = get_floor_y(character.rectangle.height);
+    character.velocity = 0;
   }
 }
 
-void controller() {
+void character_controller() {
   debug_state();
 
   if (IsKeyPressed(KEY_SPACE) && is_floor()) {
-    velocity -= 350.0 * delta;
+    character.velocity -= 400.0 * engine.delta;
   }
 
   apply_gravity();
-  character_position.y += velocity;
+  character.position.y += character.velocity;
 
   check_boundaries();
 }
 
-void character() {
-  animation_running_time += delta;
-
+void render_character() {
+  character.animation.running_time += engine.delta;
   if (!is_floor()) {
-    if (animation_running_time >= (animation_update_time * 2.5)) {
-      animation_running_time = 0.0;
-      animation_frame += 1;
+    if (character.animation.running_time >= (animation_update_time * 4.0)) {
+      character.animation.running_time = 0.0;
+      character.animation.frame += 1;
     }
   } else {
-    if (animation_running_time >= animation_update_time) {
-      animation_running_time = 0.0;
-      animation_frame += 1;
+    if (character.animation.running_time >= character.animation.update_time) {
+      character.animation.running_time = 0.0;
+      character.animation.frame += 1;
     }
   }
 
-  if (animation_frame >= 9) {
-    animation_frame = 0;
+  if (character.animation.frame >= character.sprites) {
+    character.animation.frame = 0;
   }
 
-  character_rectangle.x = character_rectangle.width * animation_frame;
+  character.rectangle.x = character.rectangle.width * character.animation.frame;
 
-  DrawTextureRec(character_texture, character_rectangle, character_position,
+  DrawTextureRec(character.texture, character.rectangle, character.position,
                  WHITE);
 }
 
+void hazard_controller() {
+  hazard.position.x -= hazard.velocity * engine.delta;
+
+  if (hazard.position.x <= (hazard.rectangle.width * -1)) {
+    hazard.position.x = window.width;
+  }
+}
+
+void render_hazard() {
+  hazard.animation.running_time += engine.delta;
+
+  if (hazard.animation.running_time >= hazard.animation.update_time) {
+    hazard.animation.running_time = 0.0;
+    hazard.animation.frame += 1;
+  }
+
+  if (hazard.animation.frame >= hazard.sprites) {
+    hazard.animation.frame = 0;
+  }
+
+  hazard.rectangle.x = hazard.rectangle.width * hazard.animation.frame;
+
+  DrawTextureRec(hazard.texture, hazard.rectangle, hazard.position, WHITE);
+}
+
+void handle_hitbox() {
+  int axis_offset = 30;
+  int size_offset = 50;
+}
+
+void initialize_character() {
+  character.texture = LoadTexture("./assets/character.png");
+
+  character.rectangle.width = character.texture.width / character.sprites;
+  character.rectangle.height = character.texture.height;
+  character.rectangle.x = 0;
+  character.rectangle.y = 0;
+
+  character.position.x = get_center_x();
+  character.position.y = get_floor_y(character.rectangle.height);
+}
+
+void initialize_hazard() {
+  hazard.texture = LoadTexture("./assets/hazard.png");
+
+  hazard.rectangle.width = hazard.texture.width / hazard.sprites;
+  hazard.rectangle.height = hazard.texture.height / hazard.sprites;
+  hazard.rectangle.x = 0;
+  hazard.rectangle.y = 0;
+
+  hazard.position.x = window.width;
+  hazard.position.y = get_floor_y(hazard.rectangle.height);
+}
+
+void kill_game() {
+  debug_state();
+
+  UnloadTexture(character.texture);
+  UnloadTexture(hazard.texture);
+
+  CloseWindow();
+}
+
 int main() {
-  InitWindow(window_width, window_height, window_title);
+  InitWindow(window.width, window.height, window.title);
   SetTargetFPS(60);
 
-  // Load sprite
-  character_texture = LoadTexture("./assets/character.png");
-  hazard_texture = LoadTexture("./assets/hazard.png");
-
-  character_rectangle.width = character_texture.width / amount_sprites;
-  character_rectangle.height = character_texture.height;
-  character_rectangle.x = 0;
-  character_rectangle.y = 0;
-
-  character_position.x = get_center_x();
-  character_position.y = get_floor_y();
+  initialize_character();
+  initialize_hazard();
 
   while (true) {
     bool shouldCloseWindow =
         WindowShouldClose(); //&& !IsKeyPressed(KEY_ESCAPE);
 
     if (shouldCloseWindow) {
-      debug_state();
-
-      UnloadTexture(character_texture);
-      UnloadTexture(hazard_texture);
-
-      CloseWindow();
+      kill_game();
       return 0;
     }
 
     BeginDrawing();
     ClearBackground(WHITE);
 
-    delta = GetFrameTime();
+    engine.delta = GetFrameTime();
 
-    character();
-    controller();
+    render_character();
+    render_hazard();
+
+    character_controller();
+    hazard_controller();
+
+    handle_hitbox();
 
     EndDrawing();
   }
