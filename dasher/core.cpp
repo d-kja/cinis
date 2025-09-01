@@ -55,7 +55,8 @@ struct Background {
   Texture2D texture;
 };
 
-const float base_scale = 4.8;
+float get_scale(float width) { return window.dimensions[0] / width; };
+float base_scale = get_scale(350.0);
 const float base_velocity_backgrounds = 20.0;
 const int amount_backgrounds = 2;
 
@@ -198,6 +199,7 @@ void render_hazard() {
       hazard.animation.frame = 0;
     }
 
+    hazard.position.y = get_floor_y(hazard.rectangle.height);
     hazard.rectangle.x = hazard.rectangle.width * hazard.animation.frame;
 
     Color colors[4] = {WHITE, RED, BLUE, GREEN};
@@ -208,6 +210,34 @@ void render_hazard() {
     hazards[idx] = hazard;
     DrawTextureRec(hazard.texture, hazard.rectangle, hazard.position,
                    color_choice);
+  }
+}
+
+void handle_resize() {
+  window.dimensions[0] = GetRenderWidth();
+  window.dimensions[1] = GetRenderHeight();
+
+  character.position.y = get_floor_y(character.rectangle.height);
+
+  for (int idx = 0; idx < std::size(backgrounds); idx++) {
+    Background background = backgrounds[idx];
+
+    base_scale = get_scale(background.texture.width);
+    backgrounds[idx].scale = base_scale;
+  }
+
+  for (int idx = 0; idx < std::size(alt_foregrounds); idx++) {
+    Background background = alt_foregrounds[idx];
+
+    base_scale = get_scale(background.texture.width);
+    alt_foregrounds[idx].scale = base_scale;
+  }
+
+  for (int idx = 0; idx < std::size(foregrounds); idx++) {
+    Background background = foregrounds[idx];
+
+    base_scale = get_scale(background.texture.width);
+    foregrounds[idx].scale = base_scale;
   }
 }
 
@@ -391,6 +421,10 @@ int main() {
     if (shouldCloseWindow) {
       kill_game();
       return 0;
+    }
+
+    if (IsWindowResized()) {
+      handle_resize();
     }
 
     BeginDrawing();
