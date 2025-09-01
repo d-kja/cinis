@@ -1,7 +1,5 @@
 #include "raylib.h"
-#include <iostream>
 #include <iterator>
-#include <ostream>
 
 struct Window {
   int dimensions[2];
