@@ -1,16 +1,29 @@
 #include <array>
 #include <raylib.h>
+
+const float BASE_SCALE = 4.0;
+
 struct _background {
   Texture2D texture{};
 
   Vector2 position{};
-  Rectangle rectangle{};
+  float rotation{};
+  float scale{BASE_SCALE};
 
-  std::array<float, 2> get_center_axis(float width, float height) {
-    float x_axis = width / 2 * -1;
-    float y_axis = height / 2 * -1;
+  std::array<float, 2> get_axis(float width, float height) {
+    float x_axis = width * BASE_SCALE;
+    float y_axis = height * BASE_SCALE;
 
     std::array<float, 2> arr = {x_axis, y_axis};
+    return arr;
+  }
+
+  std::array<float, 2> get_center_axis(float width, float height) {
+    std::array<float, 2> arr = this->get_axis(width, height);
+
+    arr[0] /= 2;
+    arr[1] /= 2;
+
     return arr;
   }
 
@@ -19,19 +32,22 @@ struct _background {
     this->texture = LoadTexture(path);
 
     std::array<float, 2> axis =
-        this->get_center_axis(this->texture.width, this->texture.height);
+        this->get_axis(this->texture.width, this->texture.height);
 
-    this->position.x = 0.0; // axis[0];
-    this->position.y = 0.0; // axis[1];
+    float width = GetRenderWidth();
+    float height = GetRenderHeight();
 
-    this->rectangle.width = this->texture.width;
-    this->rectangle.height = this->texture.height;
-    this->rectangle.x = 0.0;
-    this->rectangle.y = 0.0;
+    // CENTER BACKGROUND
+    float center_x = (width - axis[0]) / 2.0; 
+    float center_y = (height - axis[1]) / 2.0;
+
+    this->position.x = center_x;
+    this->position.y = center_y;
   }
 
   void render_background() {
-    DrawTextureRec(this->texture, this->rectangle, this->position, RAYWHITE);
+    DrawTextureEx(this->texture, this->position, this->rotation, this->scale,
+                  RAYWHITE);
   }
 };
 
