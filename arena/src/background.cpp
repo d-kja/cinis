@@ -32,14 +32,14 @@ struct _background {
     this->texture = LoadTexture(path);
 
     std::array<float, 2> axis =
-        this->get_axis(this->texture.width, this->texture.height);
+        this->get_center_axis(this->texture.width, this->texture.height);
 
-    float width = GetRenderWidth();
-    float height = GetRenderHeight();
+    float width = GetRenderWidth() / 2.0;
+    float height = GetRenderHeight() / 2.0;
 
     // CENTER BACKGROUND
-    float center_x = (width - axis[0]) / 2.0; 
-    float center_y = (height - axis[1]) / 2.0;
+    float center_x = (width - axis[0]);
+    float center_y = (height - axis[1]);
 
     this->position.x = center_x;
     this->position.y = center_y;
