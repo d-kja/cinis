@@ -1,4 +1,4 @@
-#include "./src/game.cpp"
+#include "game.h"
 
 int main() {
   Game instance{};

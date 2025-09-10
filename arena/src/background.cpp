@@ -1,60 +1,69 @@
-#include <array>
-#include <raylib.h>
+#include "./background.h"
 
-const float BASE_SCALE = 4.0;
+float BASE_SCALE = 4.0;
 
-struct _background {
-  Texture2D texture{};
+std::array<float, 2> Background::get_background_size() {
+  float x_axis = this->texture.width * BASE_SCALE;
+  float y_axis = this->texture.height * BASE_SCALE;
 
-  Vector2 position{};
-  float rotation{};
-  float scale{BASE_SCALE};
+  std::array<float, 2> arr = {x_axis, y_axis};
+  return arr;
+}
 
-  std::array<float, 2> get_axis(float width, float height) {
-    float x_axis = width * BASE_SCALE;
-    float y_axis = height * BASE_SCALE;
+std::array<float, 2> Background::get_background_center_offset() {
+  float width = GetRenderWidth() / 2.0;
+  float height = GetRenderHeight() / 2.0;
 
-    std::array<float, 2> arr = {x_axis, y_axis};
-    return arr;
+  std::array<float, 2> axis = this->get_background_size();
+
+  // WINDOW OFFSET WITH CURRENT TEXTURE
+  float offset_x = (width - axis[0]);
+  float offset_y = (height - axis[1]);
+
+  std::array<float, 2> offsets{offset_x, offset_y};
+
+  return offsets;
+}
+
+void Background::clean_up_background() { UnloadTexture(this->texture); }
+void Background::setup_background(const char *path) {
+  this->texture = LoadTexture(path);
+  std::array<float, 2> center = this->get_background_center_offset();
+
+  this->position.x = center[0];
+  this->position.y = center[1];
+
+  this->scale = BASE_SCALE;
+}
+
+void Background::render_background(float char_width, float char_height) {
+  float width = GetRenderWidth() / 2.0;
+  float height = GetRenderHeight() / 2.0;
+  float text_width = this->texture.width;
+  float text_height = this->texture.height;
+
+  std::cout << "WIDTH -> " << width << std::endl;
+  std::cout << "HEIGHT -> " << height << std::endl;
+
+  std::cout << "POS X -> " << this->position.x << std::endl;
+  std::cout << "POS Y -> " << this->position.y << std::endl;
+
+  float left_bound = width - 200;
+
+  if (left_bound < this->position.x) {
+    this->position = this->last_position;
   }
 
-  std::array<float, 2> get_center_axis(float width, float height) {
-    std::array<float, 2> arr = this->get_axis(width, height);
+  DrawTextureEx(this->texture, this->position, this->rotation, this->scale,
+                RAYWHITE);
+}
 
-    arr[0] /= 2;
-    arr[1] /= 2;
-
-    return arr;
-  }
-
-  void clean_up_background() { UnloadTexture(this->texture); }
-  void setup_background(const char *path) {
-    this->texture = LoadTexture(path);
-
-    std::array<float, 2> axis =
-        this->get_center_axis(this->texture.width, this->texture.height);
-
-    float width = GetRenderWidth() / 2.0;
-    float height = GetRenderHeight() / 2.0;
-
-    // CENTER BACKGROUND
-    float center_x = (width - axis[0]);
-    float center_y = (height - axis[1]);
-
-    this->position.x = center_x;
-    this->position.y = center_y;
-  }
-
-  void render_background() {
-    DrawTextureEx(this->texture, this->position, this->rotation, this->scale,
-                  RAYWHITE);
-  }
-};
-
-struct Backgrounds {
-  _background primary{};
-
-  void setup_backgrounds() { this->primary.setup_background("assets/map.png"); }
-  void clean_up_backgrounds() { this->primary.clean_up_background(); }
-  void render_backgrounds() { this->primary.render_background(); }
-};
+void Backgrounds::setup_backgrounds() {
+  this->primary.setup_background("assets/map.png");
+}
+void Backgrounds::clean_up_backgrounds() {
+  this->primary.clean_up_background();
+}
+void Backgrounds::render_backgrounds(float char_width, float char_height) {
+  this->primary.render_background(char_width, char_height);
+}
