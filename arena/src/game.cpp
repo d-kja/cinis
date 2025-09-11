@@ -46,7 +46,7 @@ void Game::update_delta() {
 
 void Game::runtime() {
   BeginDrawing();
-  ClearBackground(RAYWHITE);
+  ClearBackground(BLACK);
 
   handle_resize_window();
   update_delta();
