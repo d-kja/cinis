@@ -13,8 +13,8 @@ void Game::setup() {
   InitWindow(width, height, title);
 
   SetTargetFPS(target_fps);
-  SetConfigFlags(FLAG_FULLSCREEN_MODE);
-  ToggleFullscreen();
+  // SetConfigFlags(FLAG_FULLSCREEN_MODE);
+  // ToggleFullscreen();
 
   backgrounds.setup_backgrounds();
   character.setup();

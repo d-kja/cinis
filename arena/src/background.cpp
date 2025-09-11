@@ -13,14 +13,16 @@ std::array<float, 2> Background::get_background_size() {
 }
 
 std::array<float, 2> Background::get_background_center_offset() {
+  std::array<float, 2> axis = this->get_background_size();
+
   float width = GetRenderWidth() / 2.0;
   float height = GetRenderHeight() / 2.0;
 
-  std::array<float, 2> axis = this->get_background_size();
+  float axis_x_offset = axis[0] / 2.0;
+  float axis_y_offset = axis[1] / 2.0;
 
-  // WINDOW OFFSET WITH CURRENT TEXTURE
-  float offset_x = (width - axis[0] / 2.0);
-  float offset_y = (height - axis[1] / 2.0);
+  float offset_x = (width - axis_x_offset);
+  float offset_y = (height - axis_y_offset);
 
   std::array<float, 2> offsets{offset_x, offset_y};
 
@@ -40,24 +42,26 @@ void Background::setup_background(const char *path) {
 }
 
 void Background::render_background(float char_width, float char_height) {
-  std::array<float, 2> background_size = this->get_background_size();
-  std::array<float, 2> background_offset = this->get_background_center_offset();
+  this->handle_boundary();
 
-  float background_width = background_size[0];
-  float background_height = background_size[1];
+  DrawTextureEx(this->texture, this->position, this->rotation, this->scale,
+                RAYWHITE);
+}
 
-  float background_offset_x = background_offset[0] * 2.0;
-  float background_offset_y = background_offset[1] * 2.0;
+void Background::handle_boundary() {
+  std::array<float, 2> center = this->get_background_center_offset();
+  std::array<float, 2> size = this->get_background_size();
 
-  float left_bound = background_width / 2.0 + background_offset_x;
-  float right_bound =(background_width / 2.0 * -1.0) + background_offset_x;
+  float smol_offset = 25.0;
 
-  std::cout << "POS X: " << this->position.x << std::endl;
-  std::cout << "POS Y: " << this->position.y << std::endl;
-  std::cout << "LEFT BOUND OFFSET X: " << background_offset_x << std::endl;
-  std::cout << "LEFT BOUND OFFSET Y: " << background_offset_y << std::endl;
-  std::cout << "LEFT BOUND X: " << left_bound << std::endl;
-  std::cout << "RIGHT BOUND X: " << right_bound << std::endl;
+  float background_x = 0.f;
+  float background_y = this->position.y;
+
+  float right_bound = center[0] - size[0] / 2.0 + smol_offset * 2.0;
+  float left_bound = center[0] + size[0] / 2.0 - smol_offset * 2.0;
+
+  float bottom_bound = center[1] - size[1] / 2.0 + smol_offset * 6.0;
+  float top_bound = center[1] + size[1] / 2.0 - smol_offset;
 
   if (left_bound < this->position.x) {
     this->position = this->last_position;
@@ -67,8 +71,13 @@ void Background::render_background(float char_width, float char_height) {
     this->position = this->last_position;
   }
 
-  DrawTextureEx(this->texture, this->position, this->rotation, this->scale,
-                RAYWHITE);
+  if (top_bound < this->position.y) {
+    this->position = this->last_position;
+  }
+
+  if (bottom_bound > this->position.y) {
+    this->position = this->last_position;
+  }
 }
 
 void Backgrounds::setup_backgrounds() {

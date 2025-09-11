@@ -21,6 +21,7 @@ struct Background {
   void clean_up_background();
   void setup_background(const char *path);
   void render_background(float char_width, float char_height);
+  void handle_boundary();
 };
 
 struct Backgrounds {

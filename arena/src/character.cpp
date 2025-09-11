@@ -43,29 +43,31 @@ void Character::handle_controller(Backgrounds *backgrounds) {
 }
 
 void Character::update_position() {
-  float window_width_center = *this->window.width / 2.0;
-  float window_height_center = *this->window.height / 2.0;
-
-  float character_width_center = BASE_SCALE * this->texture.width / 2.0;
-  float character_height_center = BASE_SCALE * this->texture.height / 2.0;
-
-  float x = window_width_center - character_width_center;
-  float y = window_height_center - character_height_center;
-
   float sprite_width = this->texture.width / this->sprites;
   float sprite_height = this->texture.height;
 
+  float window_width = *this->window.width;
+  float window_height = *this->window.height;
+
   float sprite_direction = this->direction.x < 0.0 ? 1.0 : -1.0;
-  this->sprite_position = {.x = sprite_width * this->animation_frame,
-                           .y = 0.0f,
-                           .width = sprite_direction * sprite_width,
-                           .height = sprite_height};
+  this->sprite_position = {
+    .x = sprite_width * this->animation_frame,
+    .y = 0.0f,
+    .width = sprite_direction * sprite_width,
+    .height = sprite_height
+  };
+
+  float scaled_width = sprite_width * BASE_SCALE;
+  float scaled_height = sprite_height * BASE_SCALE;
+
+  float position_x = (window_width / 2.0) - (scaled_width / 2.0);
+  float position_y = (window_height / 2.0) - (scaled_height / 2.0);
 
   this->window_position = {
-      .x = x,
-      .y = y,
-      .width = sprite_width * BASE_SCALE,
-      .height = sprite_height * BASE_SCALE,
+      .x = position_x,
+      .y = position_y,
+      .width = scaled_width,
+      .height = scaled_height,
   };
 }
 
