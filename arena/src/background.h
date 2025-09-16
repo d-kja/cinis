@@ -18,8 +18,8 @@ struct Background {
 
   void clean_up_background();
   void setup_background(const char *path);
-  void render_background(float char_width, float char_height);
-  void handle_boundary();
+  void render_background(Texture2D character_texture, Vector2 character_position);
+  void handle_boundary(Vector2 character_position);
 };
 
 struct Backgrounds {
@@ -27,7 +27,7 @@ struct Backgrounds {
 
   void setup_backgrounds();
   void clean_up_backgrounds();
-  void render_backgrounds(float char_width, float char_height);
+  void render_backgrounds(Texture2D char_texture, Vector2 char_position);
 };
 
 #endif // !BACKGROUND_H

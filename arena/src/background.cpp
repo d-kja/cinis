@@ -1,7 +1,8 @@
 #include "background.h"
 #include "static.h"
 #include <array>
-
+#include <raylib.h>
+#include <raymath.h>
 
 std::array<float, 2> Background::get_background_size() {
   float x_axis = this->texture.width * BASE_SCALE;
@@ -40,41 +41,54 @@ void Background::setup_background(const char *path) {
   this->scale = BASE_SCALE;
 }
 
-void Background::render_background(float char_width, float char_height) {
-  this->handle_boundary();
+void Background::render_background(Texture2D character_texture,
+                                   Vector2 character_position) {
+  this->handle_boundary(character_position);
 
   DrawTextureEx(this->texture, this->position, this->rotation, this->scale,
                 RAYWHITE);
 }
 
-void Background::handle_boundary() {
-  std::array<float, 2> center = this->get_background_center_offset();
-  std::array<float, 2> size = this->get_background_size();
+void Background::handle_boundary(Vector2 character_position) {
+  Vector2 origin = Vector2Subtract(
+      this->position, character_position); // Straight the fuck up  better to
+                                           // calculate boundaries
 
-  float smol_offset = 25.0;
+  float background_width = this->texture.width * this->scale;
+  float background_height = this->texture.height * this->scale;
 
-  float background_x = 0.f;
-  float background_y = this->position.y;
+  float window_width = (float)GetRenderWidth();
+  float window_height = (float)GetRenderHeight();
 
-  float right_bound = center[0] - size[0] / 2.0 + smol_offset * 2.0;
-  float left_bound = center[0] + size[0] / 2.0 - smol_offset * 2.0;
+  float half_window_width = window_width / 2.f;
+  float half_window_height = window_height / 2.f;
 
-  float bottom_bound = center[1] - size[1] / 2.0 + smol_offset * 6.0;
-  float top_bound = center[1] + size[1] / 2.0 - smol_offset;
+  std::array<float, 2> background_x{origin.x - half_window_width,
+                                    origin.x - half_window_width +
+                                        background_width};
+  std::array<float, 2> background_y{origin.y - half_window_height,
+                                    origin.y - half_window_height +
+                                        background_height};
 
-  if (left_bound < this->position.x) {
+  float left_bound = background_x[0] + 50.f;
+  float right_bound = background_x[1] - 50.f;
+
+  float top_bound = background_y[0] + 30.f;
+  float bottom_bound = background_y[1] - 150.f;
+
+  if (left_bound >= 0.f) {
     this->position = this->last_position;
   }
 
-  if (right_bound > this->position.x) {
+  if (right_bound <= 0.f) {
     this->position = this->last_position;
   }
 
-  if (top_bound < this->position.y) {
+  if (top_bound >= 0.f) {
     this->position = this->last_position;
   }
 
-  if (bottom_bound > this->position.y) {
+  if (bottom_bound <= 0.f) {
     this->position = this->last_position;
   }
 }
@@ -85,6 +99,7 @@ void Backgrounds::setup_backgrounds() {
 void Backgrounds::clean_up_backgrounds() {
   this->primary.clean_up_background();
 }
-void Backgrounds::render_backgrounds(float char_width, float char_height) {
-  this->primary.render_background(char_width, char_height);
+void Backgrounds::render_backgrounds(Texture2D char_texture,
+                                     Vector2 char_position) {
+  this->primary.render_background(char_texture, char_position);
 }

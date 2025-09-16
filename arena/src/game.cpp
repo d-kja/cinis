@@ -68,8 +68,8 @@ void Game::runtime() {
     return;
   }
 
-  backgrounds.render_backgrounds(character.texture.width,
-                                 character.texture.height);
+  backgrounds.render_backgrounds(this->character.texture,
+                                 this->character.position);
   character.render_character();
   for (Prop prop : this->props) {
     prop.render(this->character.position, this->backgrounds.primary.position);
