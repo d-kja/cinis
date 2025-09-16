@@ -1,9 +1,11 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "prop.h"
+#include "raylib.h"
+
 #include "background.h"
 #include "character.h"
-#include "raylib.h"
 #include "window.h"
 
 struct Game {
@@ -14,8 +16,8 @@ struct Game {
   float *window_width = &width;
   float *window_height = &height;
 
-  Character character{
-      .window = {.width = window_width, .height = window_height}};
+  Character character{{.width = window_width, .height = window_height}};
+  std::vector<Prop> props{};
   Backgrounds backgrounds;
 
   void setup();

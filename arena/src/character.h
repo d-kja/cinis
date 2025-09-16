@@ -2,15 +2,13 @@
 #define CHARACTER_H
 
 #include "background.h"
+#include "static.h"
 
 #include <raylib.h>
 #include <raymath.h>
 #include <string>
 #include <vector>
 
-extern const float BASE_SPEED;
-extern const float AMOUNT_SPRITES; 
-extern const float ANIMATION_TIME_BASE;
 
 struct Damage {
   float health{};
@@ -23,6 +21,7 @@ struct _Window {
 };
 
 struct Character {
+  Character(_Window window);
   _Window window{};
 
   float delta{};

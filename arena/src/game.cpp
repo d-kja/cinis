@@ -1,13 +1,10 @@
-
 #include "game.h"
-
-#include "character.h"
-#include "window.h"
-
+#include "prop.h"
 #include "raylib.h"
 
-// float* Game::window_width = &width;
-// float* Game::window_height = &height;
+#include "character.h"
+#include "static.h"
+#include "window.h"
 
 void Game::setup() {
   InitWindow(width, height, title);
@@ -18,12 +15,25 @@ void Game::setup() {
 
   backgrounds.setup_backgrounds();
   character.setup();
+
+  Prop red_prop{Rectangle{.x = 0, .y = 0.f, .width = 380.f, .height = 400.f},
+                Vector2{.x = 770.f, .y = 1280.f}};
+
+  Prop red_prop_2{
+      Rectangle{.x = 0.f, .y = 0.f, .width = 250.f, .height = 400.f},
+      Vector2{.x = 2000.f, .y = 800.f}};
+
+  this->props.push_back(red_prop);
+  this->props.push_back(red_prop_2);
 };
 
 void Game::clean_up() {
-  // Unload assets
   backgrounds.clean_up_backgrounds();
   character.clean_up();
+
+  for (Prop prop : this->props) {
+    prop.clean_up();
+  }
 
   CloseWindow();
 }
@@ -61,15 +71,11 @@ void Game::runtime() {
   backgrounds.render_backgrounds(character.texture.width,
                                  character.texture.height);
   character.render_character();
+  for (Prop prop : this->props) {
+    prop.render(this->character.position, this->backgrounds.primary.position);
+  }
 
   character.handle_controller(&backgrounds);
 
   EndDrawing();
 }
-
-// Window* heap_window = new Window{100.f, 200.f};  // Heap allocation (new /
-// malloc) float* heap_width = &heap_window->width; // pointer that needs to be
-// freed, cuz heap value;
-//
-// delete heap_window; -> dangling
-// heap_window = nullptr;

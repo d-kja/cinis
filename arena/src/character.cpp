@@ -1,12 +1,13 @@
 #include "character.h"
 #include "background.h"
+#include "static.h"
 
 #include <raylib.h>
 #include <raymath.h>
 
-const float BASE_SPEED = 500.0;
-const float AMOUNT_SPRITES = 6.0;
-const float ANIMATION_TIME_BASE = 1.0 / 12.0;
+Character::Character(_Window window) {
+  this->window = window;
+};
 
 void Character::handle_controller(Backgrounds *backgrounds) {
   this->direction = {};

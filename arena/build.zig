@@ -13,6 +13,8 @@ pub fn build(b: *std.Build) void {
     exe.addCSourceFiles(.{
         .files = &.{
             "src/main.cpp",
+            "src/static.cpp",
+            "src/prop.cpp",
             "src/window.cpp",
             "src/background.cpp",
             "src/character.cpp",

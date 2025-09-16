@@ -5,8 +5,6 @@
 #include <iostream>
 #include <raylib.h>
 
-extern float BASE_SCALE;
-
 struct Background {
   Texture2D texture{};
 

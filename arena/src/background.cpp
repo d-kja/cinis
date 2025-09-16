@@ -1,8 +1,7 @@
-#include "./background.h"
+#include "background.h"
+#include "static.h"
 #include <array>
-#include <iostream>
 
-float BASE_SCALE = 4.0;
 
 std::array<float, 2> Background::get_background_size() {
   float x_axis = this->texture.width * BASE_SCALE;
