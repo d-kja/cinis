@@ -1,12 +1,13 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "prop.h"
 #include "raylib.h"
 
 #include "background.h"
-#include "character.h"
 #include "window.h"
+
+#include "character.h"
+#include "props.h"
 
 struct Game {
   bool playing{true};
@@ -17,8 +18,8 @@ struct Game {
   float *window_height = &height;
 
   Character character{{.width = window_width, .height = window_height}};
-  std::vector<Prop> props{};
   Backgrounds backgrounds;
+  Props props{};
 
   void setup();
   void clean_up();

@@ -6,15 +6,16 @@
 
 struct Prop {
 public:
-  Prop(Rectangle rectangle, Vector2 positon);
+  Prop(Texture2D texture, Vector2 positon);
   void render(Vector2 character_position, Vector2 world_position);
   void clean_up();
 
 private:
-  Rectangle rectangle{};
+  Texture2D texture{};
   Vector2 position{};
 
   float scale{BASE_SCALE};
+  float rotation{0.f};
 };
 
 #endif // !PROP

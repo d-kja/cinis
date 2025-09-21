@@ -5,14 +5,15 @@
     },
     "activeFile": "rpg-example.tmx",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
         "rpg-example.tmx": {
-            "scale": 1.5,
-            "selectedLayer": 0,
+            "scale": 0.75,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": -272.3333333333333,
-                "y": 48
+                "x": 979.3333333333334,
+                "y": 462.66666666666663
             }
         },
         "rpg-ground-tileset.tsx": {
