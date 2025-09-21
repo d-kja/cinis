@@ -41,15 +41,12 @@ void Background::setup_background(const char *path) {
   this->scale = BASE_SCALE;
 }
 
-void Background::render_background(Texture2D character_texture,
-                                   Vector2 character_position) {
-  this->handle_boundary(character_position);
-
+void Background::render_background() {
   DrawTextureEx(this->texture, this->position, this->rotation, this->scale,
                 RAYWHITE);
 }
 
-void Background::handle_boundary(Vector2 character_position) {
+std::array<Vector2, 2> Background::get_center(Vector2 character_position) {
   Vector2 origin = Vector2Subtract(
       this->position, character_position); // Straight the fuck up  better to
                                            // calculate boundaries
@@ -70,36 +67,49 @@ void Background::handle_boundary(Vector2 character_position) {
                                     origin.y - half_window_height +
                                         background_height};
 
-  float left_bound = background_x[0] + 50.f;
-  float right_bound = background_x[1] - 50.f;
+  std::array<Vector2, 2> center = {
+      Vector2{.x = background_x[0], .y = background_y[0]},
+      Vector2{.x = background_x[1], .y = background_y[1]},
+  };
 
-  float top_bound = background_y[0] + 30.f;
-  float bottom_bound = background_y[1] - 150.f;
+  return center;
+}
+
+void Background::handle_collision(Vector2 character_position) {
+  std::array<Vector2, 2> background_position =
+      this->get_center(character_position);
+
+  float left_bound = background_position[0].x + 50.f;
+  float right_bound = background_position[1].x - 50.f;
+
+  float top_bound = background_position[0].y + 30.f;
+  float bottom_bound = background_position[1].y - 150.f;
 
   if (left_bound >= 0.f) {
-    this->position = this->last_position;
+    this->revert_step();
   }
 
   if (right_bound <= 0.f) {
-    this->position = this->last_position;
+    this->revert_step();
   }
 
   if (top_bound >= 0.f) {
-    this->position = this->last_position;
+    this->revert_step();
   }
 
   if (bottom_bound <= 0.f) {
-    this->position = this->last_position;
+    this->revert_step();
   }
 }
+
+void Background::revert_step() { this->position = this->last_position; }
 
 void Backgrounds::setup_backgrounds() {
   this->primary.setup_background("assets/map.png");
 }
+
 void Backgrounds::clean_up_backgrounds() {
   this->primary.clean_up_background();
 }
-void Backgrounds::render_backgrounds(Texture2D char_texture,
-                                     Vector2 char_position) {
-  this->primary.render_background(char_texture, char_position);
-}
+
+void Backgrounds::render_backgrounds() { this->primary.render_background(); }

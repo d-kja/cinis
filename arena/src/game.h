@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "collision.h"
 #include "raylib.h"
 
 #include "background.h"
@@ -20,6 +21,8 @@ struct Game {
   Character character{{.width = window_width, .height = window_height}};
   Backgrounds backgrounds;
   Props props{};
+
+  Collision collision{};
 
   void setup();
   void clean_up();

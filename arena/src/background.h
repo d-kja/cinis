@@ -18,8 +18,13 @@ struct Background {
 
   void clean_up_background();
   void setup_background(const char *path);
-  void render_background(Texture2D character_texture, Vector2 character_position);
-  void handle_boundary(Vector2 character_position);
+
+  void render_background();
+  void handle_collision(Vector2 character_position);
+
+  std::array<Vector2, 2> get_center(Vector2 character_position);
+
+  void revert_step();
 };
 
 struct Backgrounds {
@@ -27,7 +32,8 @@ struct Backgrounds {
 
   void setup_backgrounds();
   void clean_up_backgrounds();
-  void render_backgrounds(Texture2D char_texture, Vector2 char_position);
+
+  void render_backgrounds();
 };
 
 #endif // !BACKGROUND_H

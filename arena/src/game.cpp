@@ -5,6 +5,7 @@
 #include "window.h"
 
 #include "character.h"
+#include "collision.h"
 #include "props.h"
 
 void Game::setup() {
@@ -17,7 +18,12 @@ void Game::setup() {
   backgrounds.setup_backgrounds();
   character.setup();
   props.setup();
-  props.setup();
+
+  Background *background_ref = &this->backgrounds.primary;
+  Character *char_ref = &this->character;
+  Props *props_ref = &this->props;
+
+  collision.setup(char_ref, background_ref, props_ref);
 };
 
 void Game::clean_up() {
@@ -58,12 +64,13 @@ void Game::runtime() {
     return;
   }
 
-  backgrounds.render_backgrounds(this->character.texture,
-                                 this->character.position);
-  character.render_character();
+  backgrounds.render_backgrounds();
   props.render(this->character.position, this->backgrounds.primary.position);
+  character.render_character();
 
   character.handle_controller(&backgrounds);
+
+  collision.handle_collision();
 
   EndDrawing();
 }

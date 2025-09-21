@@ -12,6 +12,7 @@ public:
   void setup();
 
   void render(Vector2 character_position, Vector2 world_position);
+  std::vector<Prop> get_props();
 
 private:
   std::vector<Prop> props;
