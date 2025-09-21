@@ -17,10 +17,12 @@ void Game::setup() {
 
   backgrounds.setup_backgrounds();
   character.setup();
+  enemies.setup();
   props.setup();
 
   Background *background_ref = &this->backgrounds.primary;
   Character *char_ref = &this->character;
+  Enemies *enemies_ref = &this->enemies;
   Props *props_ref = &this->props;
 
   collision.setup(char_ref, background_ref, props_ref);
@@ -29,6 +31,7 @@ void Game::setup() {
 void Game::clean_up() {
   backgrounds.clean_up_backgrounds();
   character.clean_up();
+  enemies.clean_up();
   props.clean_up();
 
   CloseWindow();
@@ -48,6 +51,7 @@ void Game::update_delta() {
   delta = GetFrameTime();
 
   character.update_delta(this->delta);
+  enemies.update_delta(this->delta);
 }
 
 void Game::runtime() {
@@ -65,9 +69,11 @@ void Game::runtime() {
   }
 
   backgrounds.render_backgrounds();
-  props.render(this->character.position, this->backgrounds.primary.position);
-  character.render_character();
 
+  props.render(this->character.position, this->backgrounds.primary.position);
+  enemies.render();
+
+  character.render_character();
   character.handle_controller(&backgrounds);
 
   collision.handle_collision();

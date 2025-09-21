@@ -1,6 +1,7 @@
 #include "props.h"
-#include "prop.h"
 #include <raylib.h>
+
+#include "prop.h"
 
 Props::Props() {}
 

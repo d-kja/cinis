@@ -8,6 +8,7 @@
 #include "window.h"
 
 #include "character.h"
+#include "enemies.h"
 #include "props.h"
 
 struct Game {
@@ -20,6 +21,7 @@ struct Game {
 
   Character character{{.width = window_width, .height = window_height}};
   Backgrounds backgrounds;
+  Enemies enemies{};
   Props props{};
 
   Collision collision{};

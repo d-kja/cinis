@@ -1,6 +1,8 @@
 #include "static.h"
 
 const float AMOUNT_SPRITES = 6.0;
+const float ENEMY_AMOUNT_SPRITES = 6.0;
+
 const float ANIMATION_TIME_BASE = 1.0 / 12.0;
 
 const float BASE_SPEED = 500.0;
