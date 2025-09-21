@@ -14,19 +14,19 @@ void Enemies::setup() {
 }
 
 void Enemies::render() {
-  for (int idx{}; idx < this->enemies.size(); idx++) {
-    enemies[idx].render_enemy();
+  for (auto &enemy : enemies) {
+    enemy.render_enemy();
   }
 }
 
 void Enemies::clean_up() {
-  for (int idx{}; idx < this->enemies.size(); idx++) {
-    enemies[idx].clean_up();
+  for (auto &enemy : enemies) {
+    enemy.clean_up();
   }
 }
 
 void Enemies::update_delta(float delta) {
-  for (int idx{}; idx < this->enemies.size(); idx++) {
-    enemies[idx].update_delta(delta);
+  for (auto &enemy : enemies) {
+    enemy.update_delta(delta);
   }
 }
